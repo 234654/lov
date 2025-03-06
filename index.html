@@ -19,6 +19,9 @@
             --daisy-center: #ffd700;
             --leaf-green: #2d8c3c;
             --stem-green: #3fa34d;
+            --title-size: clamp(1.2rem, 4vw, 2rem);
+            --flower-scale: clamp(0.4, 0.6, 0.8);
+            --content-padding: clamp(0.5rem, 2vh, 2rem);
         }
 
         body {
@@ -26,6 +29,7 @@
             align-items: flex-end;
             justify-content: center;
             min-height: 100vh;
+            min-height: 100dvh;
             background-color: var(--dark-color);
             overflow: hidden;
             perspective: 1000px;
@@ -51,12 +55,13 @@
             width: 100%;
             color: white;
             font-family: 'Arial', sans-serif;
-            font-size: 2.5rem;
+            font-size: var(--title-size);
             text-align: center;
-            padding: 2rem;
+            padding: var(--content-padding);
             text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-            letter-spacing: 0.1em;
+            letter-spacing: 0.05em;
             white-space: nowrap;
+            overflow: hidden;
         }
 
         @keyframes fadeIn {
@@ -77,12 +82,13 @@
 
         .title span {
             display: inline-block;
-            margin: 0 0.1em;
+            margin: 0 0.05em;
         }
 
         .flowers {
             position: relative;
-            transform: scale(0.9);
+            transform: scale(var(--flower-scale));
+            margin-bottom: clamp(10vh, 15vh, 20vh);
         }
 
         .flower {
@@ -137,7 +143,6 @@
             );
         }
 
-        /* Create natural-looking petals */
         .flower__leaf--1 { transform: translate(-50%, 0) rotate(0deg) skewX(-5deg); }
         .flower__leaf--2 { transform: translate(-50%, 0) rotate(30deg) skewX(-5deg); }
         .flower__leaf--3 { transform: translate(-50%, 0) rotate(60deg) skewX(-5deg); }
@@ -154,7 +159,13 @@
         .flower__line {
             height: 45vmin;
             width: 0.6vmin;
-            background-image: linear-gradient(to top, transparent 10%, var(--leaf-green), var(--stem-green));
+            background-image: linear-gradient(
+                to top, 
+                transparent 10%, 
+                var(--leaf-green), 
+                #4eca5c 50%,
+                var(--stem-green)
+            );
             box-shadow: 
                 inset 0 0 2px rgba(0, 0, 0, 0.5),
                 0 0 1vmin rgba(45, 140, 60, 0.2);
@@ -163,26 +174,36 @@
 
         .flower__line__leaf {
             position: absolute;
-            width: 8vmin;
+            width: 14vmin;
             height: 2.5vmin;
             background-color: var(--leaf-green);
-            border-radius: 2vmin;
             transform-origin: 0 50%;
             box-shadow: 
                 inset 0 0 1vmin rgba(63, 163, 77, 0.5),
                 0 0 0.5vmin rgba(45, 140, 60, 0.2);
+            background-image: linear-gradient(
+                to right,
+                var(--leaf-green),
+                #4eca5c 50%,
+                var(--leaf-green) 90%
+            );
+            border-radius: 0 100% 0 0;
+            clip-path: polygon(0 0, 100% 50%, 0 100%);
+            transform-origin: left center;
         }
 
         .flower__line__leaf--1 { 
             left: 0;
             top: 20%;
-            transform: rotate(-20deg);
+            transform: rotate(-20deg) scale(0.9);
+            filter: brightness(1.05);
         }
 
         .flower__line__leaf--2 { 
-            left: -8vmin;
+            left: -13vmin;
             top: 45%;
-            transform: rotate(-30deg);
+            transform: rotate(-30deg) scale(1);
+            filter: brightness(0.9);
         }
 
         @keyframes moving-flower {
@@ -211,6 +232,58 @@
             100% { 
                 height: 45vmin;
                 opacity: 1;
+            }
+        }
+
+        /* Mobile adaptations */
+        @media (max-width: 768px) {
+            .title span {
+                margin: 0 0.03em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .title {
+                letter-spacing: 0.03em;
+            }
+        }
+
+        @media (max-height: 600px) {
+            .flowers {
+                margin-bottom: 25vh;
+            }
+        }
+
+        /* Add for portrait orientation */
+        @media (orientation: portrait) and (max-width: 380px) {
+            :root {
+                --title-size: 1rem;
+                --flower-scale: 0.35;
+            }
+
+            .title {
+                padding: 0.5rem;
+                letter-spacing: 0.02em;
+            }
+
+            .title span {
+                margin: 0 0.02em;
+            }
+
+            .flowers {
+                margin-bottom: 30vh;
+            }
+        }
+
+        /* Add for very small heights */
+        @media (max-height: 400px) {
+            .flowers {
+                margin-bottom: 35vh;
+                transform: scale(0.3);
+            }
+
+            .title {
+                font-size: 0.9rem;
             }
         }
     </style>
@@ -252,24 +325,20 @@
             setTimeout(() => {
                 document.body.classList.remove("not-loaded");
 
-                const titles = 'Моей любимой
-                                    пикми'.split('');  // Added extra spaces
+                const titles = 'Моей любимой пикми'.split('');
                 const titleElement = document.getElementById('title');
                 let index = 0;
 
-                // Add cursor style
                 titleElement.style.borderRight = '0.15em solid #fff';
                 titleElement.style.animation = 'blink-caret 0.75s step-end infinite';
 
                 function appendTitle() {
                     if (index < titles.length) {
-                        // Add fade-in effect to each character
                         const span = document.createElement('span');
                         span.textContent = titles[index];
 
-                        // Add proper spacing for spaces
                         if (titles[index] === ' ') {
-                            span.style.marginRight = '0.5em';
+                            span.style.marginRight = '0.3em';
                         }
 
                         span.style.opacity = '0';
@@ -277,11 +346,9 @@
                         titleElement.appendChild(span);
 
                         index++;
-                        // Vary the typing speed slightly for more natural effect
-                        const delay = titles[index-1] === ' ' ? 100 : 200 + Math.random() * 200;
+                        const delay = titles[index-1] === ' ' ? 50 : 100 + Math.random() * 100;
                         setTimeout(appendTitle, delay);
                     } else {
-                        // Remove cursor when done typing
                         setTimeout(() => {
                             titleElement.style.borderRight = 'none';
                         }, 1000);
