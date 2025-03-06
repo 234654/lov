@@ -57,6 +57,7 @@
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
             letter-spacing: 0.1em;
             white-space: nowrap;
+            pointer-events: none;
         }
 
         @keyframes fadeIn {
@@ -79,9 +80,13 @@
             display: inline-block;
             margin: 0 0.05em;
         }
+
         .flowers {
             position: relative;
             transform: scale(0.9);
+            cursor: move;
+            user-select: none;
+            touch-action: none;
         }
 
         .flower {
@@ -168,10 +173,10 @@
 
         .flower__line__leaf {
             position: absolute;
-            width: 14vmin;
-            height: 2.5vmin;
+            width: 16vmin;  /* Размер листа */
+            height: 4vmin;
             background-color: var(--leaf-green);
-            transform-origin: 0 50%;
+            transform-origin: left center;
             box-shadow: 
                 inset 0 0 1vmin rgba(63, 163, 77, 0.5),
                 0 0 0.5vmin rgba(45, 140, 60, 0.2);
@@ -181,21 +186,20 @@
                 #4eca5c 50%,
                 var(--leaf-green) 90%
             );
-            border-radius: 0 100% 0 0;
             clip-path: polygon(0 0, 100% 50%, 0 100%);
             transform-origin: left center;
         }
 
         .flower__line__leaf--1 { 
             left: 0;
-            top: 20%;
+            top: 25%;
             transform: rotate(-20deg) scale(0.9);
             filter: brightness(1.05);
         }
 
         .flower__line__leaf--2 { 
-            left: -13vmin;
-            top: 45%;
+            left: -15vmin;
+            top: 50%;
             transform: rotate(-30deg) scale(1);
             filter: brightness(0.9);
         }
@@ -267,7 +271,7 @@
             setTimeout(() => {
                 document.body.classList.remove("not-loaded");
 
-                const titles = 'Моей любимой пикми'.split('');  // Added more spaces for better separation
+                const titles = 'Моей любимой пикми'.split('');  // Один пробел между словами
                 const titleElement = document.getElementById('title');
                 let index = 0;
 
@@ -277,13 +281,12 @@
 
                 function appendTitle() {
                     if (index < titles.length) {
-                        // Add fade-in effect to each character
                         const span = document.createElement('span');
                         span.textContent = titles[index];
 
                         // Add proper spacing for spaces
                         if (titles[index] === ' ') {
-                            span.style.marginRight = '0.3em';  // Reduced margin for smaller text
+                            span.style.marginRight = '0.2em';  // Уменьшенный отступ для пробела
                         }
 
                         span.style.opacity = '0';
@@ -291,11 +294,9 @@
                         titleElement.appendChild(span);
 
                         index++;
-                        // Vary the typing speed slightly for more natural effect
                         const delay = titles[index-1] === ' ' ? 100 : 200 + Math.random() * 200;
                         setTimeout(appendTitle, delay);
                     } else {
-                        // Remove cursor when done typing
                         setTimeout(() => {
                             titleElement.style.borderRight = 'none';
                         }, 1000);
@@ -304,6 +305,69 @@
 
                 appendTitle();
             }, 1000);
+
+            // Drag and Drop functionality
+            const flower = document.querySelector('.flowers');
+            let isDragging = false;
+            let currentX;
+            let currentY;
+            let initialX;
+            let initialY;
+            let xOffset = 0;
+            let yOffset = 0;
+
+            function dragStart(e) {
+                if (e.type === "touchstart") {
+                    initialX = e.touches[0].clientX - xOffset;
+                    initialY = e.touches[0].clientY - yOffset;
+                } else {
+                    initialX = e.clientX - xOffset;
+                    initialY = e.clientY - yOffset;
+                }
+
+                if (e.target.closest('.flowers')) {
+                    isDragging = true;
+                }
+            }
+
+            function dragEnd(e) {
+                initialX = currentX;
+                initialY = currentY;
+                isDragging = false;
+            }
+
+            function drag(e) {
+                if (isDragging) {
+                    e.preventDefault();
+
+                    if (e.type === "touchmove") {
+                        currentX = e.touches[0].clientX - initialX;
+                        currentY = e.touches[0].clientY - initialY;
+                    } else {
+                        currentX = e.clientX - initialX;
+                        currentY = e.clientY - initialY;
+                    }
+
+                    xOffset = currentX;
+                    yOffset = currentY;
+
+                    setTranslate(currentX, currentY, flower);
+                }
+            }
+
+            function setTranslate(xPos, yPos, el) {
+                el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0) scale(0.9)`;
+            }
+
+            // Touch events
+            document.addEventListener("touchstart", dragStart, false);
+            document.addEventListener("touchend", dragEnd, false);
+            document.addEventListener("touchmove", drag, false);
+
+            // Mouse events
+            document.addEventListener("mousedown", dragStart, false);
+            document.addEventListener("mouseup", dragEnd, false);
+            document.addEventListener("mousemove", drag, false);
         };
     </script>
 </body>
